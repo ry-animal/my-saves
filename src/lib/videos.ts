@@ -60,6 +60,7 @@ export async function deleteVideo(id: string) {
 //   }
 // }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function saveVideo(videoDetails: any) {
   const savedVideo = {
     ...videoDetails,

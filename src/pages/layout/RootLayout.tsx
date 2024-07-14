@@ -9,8 +9,6 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, title = 'MySaves' }) => {
-  const router = useRouter();
-
   return (
     <div
       className="flex flex-col min-h-screen bg-cover bg-center bg-fixed"

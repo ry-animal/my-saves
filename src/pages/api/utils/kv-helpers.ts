@@ -1,5 +1,6 @@
 import { kv } from '@vercel/kv';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function saveVideo(videoDetails: any) {
   const savedVideo = {
     ...videoDetails,
