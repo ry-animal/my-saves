@@ -1,18 +1,11 @@
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { getVideoDetails } from '../../lib/videos';
+import { getVideoDetails, Video } from '../../lib/videos';
 import SEO from '../../components/SEO';
 import VideoPlayer from '../../components/Player';
 
 interface VideoPageProps {
-  video: {
-    id: string;
-    title: string;
-    description: string;
-    url: string;
-    thumbnailUrl: string;
-    isShort: boolean;
-  };
+  video: Video;
 }
 
 const VideoPage: NextPage<VideoPageProps> = ({ video }) => {

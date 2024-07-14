@@ -1,22 +1,14 @@
+import { Video } from '@/lib/videos';
 import { kv } from '@vercel/kv';
 import { v4 as uuid4 } from 'uuid';
 
-export interface Video {
-  id: string;
-  title: string;
-  url: string;
-  thumbnailUrl: string;
-  description: string;
-  isShort: boolean;
-  createdAt: string;
-}
-
-export async function saveVideo(videoDetails: Omit<Video, 'id' | 'createdAt'>) {
+export async function saveVideo(videoDetails: Omit<Video, 'id' | 'createdAt' | 'views'>) {
   const id = uuid4();
   const savedVideo: Video = {
     ...videoDetails,
     id,
     createdAt: new Date().toISOString(),
+    views: 0,
   };
 
   await kv.set(`video:${id}`, savedVideo);

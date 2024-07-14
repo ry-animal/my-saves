@@ -2,12 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import GridLayout from '@/pages/layout/GridLayout';
-
-interface Video {
-  id: string;
-  title: string;
-  thumbnailUrl: string;
-}
+import { Video } from '@/lib/videos';
 
 interface VideoGridProps {
   videos: Video[];
@@ -28,6 +23,8 @@ const VideoGrid: React.FC<VideoGridProps> = ({ videos }) => {
             </div>
             <div className="p-4">
               <h3 className="text-lg font-semibold truncate text-black">{video.title}</h3>
+
+              <h3 className="text-lg font-semibold truncate text-black">Views: {video.views}</h3>
             </div>
           </div>
         </Link>

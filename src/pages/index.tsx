@@ -3,16 +3,10 @@ import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import SEO from '../components/SEO';
 import VideoGrid from '../components/VideoGrid';
-import { getAllVideos } from '../lib/videos';
+import { getAllVideos, Video } from '../lib/videos';
 
 interface HomeProps {
-  videos: Array<{
-    id: string;
-    title: string;
-    thumbnailUrl: string;
-    views: number;
-    isShort: boolean;
-  }>;
+  videos: Array<Video>;
 }
 
 const Home: NextPage<HomeProps> = ({ videos }) => {

@@ -11,6 +11,7 @@ export interface Video {
   uploadDate: string;
   isShort: boolean;
   createdAt: string;
+  views: number;
 }
 
 export async function saveVideo(videoDetails: Omit<Video, 'id' | 'createdAt'>) {
@@ -38,7 +39,9 @@ function isVideoData(data: unknown): data is Video {
     'description' in data &&
     'url' in data &&
     'isShort' in data &&
-    'createdAt' in data
+    'createdAt' in data &&
+    'views' in data &&
+    'uploadDate' in data
   );
 }
 
@@ -64,13 +67,9 @@ export async function getAllVideos(page: number, limit: number, sortBy: 'views' 
 
     const videos = await Promise.all(
       videoIds.map(async (id) => {
-        const videoData = (await kv.get(`video:${id}`)) as Video | null;
-        const viewsData = await kv.get(`views:${id}`);
-        const views =
-          typeof viewsData === 'number' ? viewsData : typeof viewsData === 'string' ? parseInt(viewsData, 10) : 0;
-
-        if (videoData) {
-          return { ...videoData, views };
+        const videoData = await kv.get(`video:${id}`);
+        if (isVideoData(videoData)) {
+          return videoData;
         } else {
           console.error(`Invalid video data for id: ${id}`, videoData);
           return null;
@@ -78,7 +77,7 @@ export async function getAllVideos(page: number, limit: number, sortBy: 'views' 
       }),
     );
 
-    const filteredVideos = videos.filter((video): video is NonNullable<typeof video> => video !== null);
+    const filteredVideos = videos.filter((video): video is Video => video !== null);
 
     return {
       videos: filteredVideos,
@@ -91,16 +90,13 @@ export async function getAllVideos(page: number, limit: number, sortBy: 'views' 
   }
 }
 
-export async function getVideoDetails(id: string): Promise<(Video & { views: number }) | null> {
+export async function getVideoDetails(id: string): Promise<Video | null> {
   const videoData = await kv.get(`video:${id}`);
-  const viewsData = await kv.get(`views:${id}`);
-
-  const views = typeof viewsData === 'number' ? viewsData : typeof viewsData === 'string' ? parseInt(viewsData, 10) : 0;
 
   if (isVideoData(videoData)) {
-    return { ...videoData, views };
+    return videoData;
   } else {
-    console.error(`invalid data for id: ${id}`, videoData);
+    console.error(`Invalid data for id: ${id}`, videoData);
     return null;
   }
 }
@@ -130,4 +126,17 @@ export function extractVideoInfo(url: string): { videoId: string; isShort: boole
   }
 
   throw new Error('invalid url');
+}
+
+export async function incrementViewCount(id: string): Promise<number> {
+  const video = await getVideoDetails(id);
+  if (!video) {
+    throw new Error(`Video with id ${id} not found`);
+  }
+
+  const newViewCount = video.views + 1;
+  await kv.set(`video:${id}`, { ...video, views: newViewCount });
+  await kv.zadd('video_views', { score: newViewCount, member: id });
+
+  return newViewCount;
 }

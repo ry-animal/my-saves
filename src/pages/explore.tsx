@@ -3,16 +3,10 @@ import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import SEO from '../components/SEO';
 import VideoGrid from '../components/VideoGrid';
-import { getAllVideos } from '../lib/videos';
+import { getAllVideos, Video } from '../lib/videos';
 
 interface ExploreProps {
-  videos: Array<{
-    id: string;
-    title: string;
-    thumbnailUrl: string;
-    views: number;
-    isShort: boolean;
-  }>;
+  videos: Array<Video>;
   currentPage: number;
   totalPages: number;
 }
