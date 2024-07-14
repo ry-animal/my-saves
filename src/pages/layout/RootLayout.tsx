@@ -32,12 +32,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'MySaves' }) => {
                 </Link>
               </li>
               <li>
-                <Link href="#features" className="hover:underline">
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link href="#explore" className="hover:underline">
+                <Link href="/explore" className="hover:underline">
                   Explore
                 </Link>
               </li>

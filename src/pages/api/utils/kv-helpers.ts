@@ -1,14 +1,27 @@
 import { kv } from '@vercel/kv';
+import { v4 as uuid4 } from 'uuid';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function saveVideo(videoDetails: any) {
-  const savedVideo = {
+export interface Video {
+  id: string;
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  description: string;
+  isShort: boolean;
+  createdAt: string;
+}
+
+export async function saveVideo(videoDetails: Omit<Video, 'id' | 'createdAt'>) {
+  const id = uuid4();
+  const savedVideo: Video = {
     ...videoDetails,
+    id,
     createdAt: new Date().toISOString(),
   };
 
-  await kv.set(`video:${savedVideo.id}`, savedVideo);
-  await kv.lpush('all_videos', savedVideo.id);
+  await kv.set(`video:${id}`, savedVideo);
+  await kv.lpush('all_videos', id);
+  await kv.zadd('video_views', { score: 0, member: id });
 
   return savedVideo;
 }
@@ -22,8 +35,17 @@ export async function getAllVideos(page: number, limit: number) {
 
   const videos = await Promise.all(
     videoIds.map(async (id) => {
-      const videoData = await kv.get(`video:${id}`);
-      return videoData;
+      const videoData = (await kv.get(`video:${id}`)) as Video | null;
+      const viewsData = await kv.get(`views:${id}`);
+      const views =
+        typeof viewsData === 'number' ? viewsData : typeof viewsData === 'string' ? parseInt(viewsData, 10) : 0;
+
+      if (videoData) {
+        return { ...videoData, views };
+      } else {
+        console.error(`Invalid video data for id: ${id}`, videoData);
+        return null;
+      }
     }),
   );
 

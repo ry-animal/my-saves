@@ -1,14 +1,17 @@
 import type { NextPage } from 'next';
 import { GetServerSideProps } from 'next';
+import Link from 'next/link';
 import SEO from '../components/SEO';
 import VideoGrid from '../components/VideoGrid';
-import { getAllVideos } from './api/utils/kv-helpers';
+import { getAllVideos } from '../lib/videos';
 
 interface HomeProps {
   videos: Array<{
     id: string;
     title: string;
     thumbnailUrl: string;
+    views: number;
+    isShort: boolean;
   }>;
 }
 
@@ -21,9 +24,14 @@ const Home: NextPage<HomeProps> = ({ videos }) => {
         ogImage="/og-home.jpg"
         ogUrl="/"
       />
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Recently Saved Videos</h1>
-        <VideoGrid videos={videos} />
+      <main className="container mx-auto px-4 py-8 text-black">
+        <h1 className="text-3xl font-bold mb-6">Top 6 Most Viewed Videos</h1>
+        {videos.length > 0 ? <VideoGrid videos={videos} /> : <p>No videos available. Start by adding some!</p>}
+        <div className="mt-8 text-center">
+          <Link href="/explore" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Explore All Videos
+          </Link>
+        </div>
       </main>
     </>
   );
@@ -31,7 +39,7 @@ const Home: NextPage<HomeProps> = ({ videos }) => {
 
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
-    const { videos } = await getAllVideos(1, 8);
+    const { videos } = await getAllVideos(1, 6, 'views');
     return { props: { videos } };
   } catch (error) {
     console.error('Error fetching videos:', error);

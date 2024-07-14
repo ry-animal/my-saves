@@ -23,25 +23,33 @@ export function extractVideoInfo(url: string): { videoId: string; isShort: boole
 }
 
 export async function fetchYouTubeVideoDetails(url: string) {
-  const { videoId, isShort } = extractVideoInfo(url);
+  const videoId = extractVideoId(url);
+  if (!videoId) {
+    throw new Error('invalid url');
+  }
 
   const response = await youtube.videos.list({
     part: ['snippet'],
     id: [videoId],
   });
 
-  const videoDetails = response.data.items?.[0];
+  const videoDetails = response.data.items?.[0]?.snippet;
   if (!videoDetails) {
-    throw new Error('Video not found on YouTube');
+    throw new Error('no video found on youtube');
   }
 
   return {
-    id: videoId,
     url,
-    title: videoDetails.snippet?.title,
-    description: videoDetails.snippet?.description,
-    thumbnailUrl: videoDetails.snippet?.thumbnails?.high?.url,
-    uploadDate: videoDetails.snippet?.publishedAt,
-    isShort,
+    title: videoDetails.title || 'Untitled Video',
+    description: videoDetails.description || 'no description',
+    thumbnailUrl: videoDetails.thumbnails?.high?.url || videoDetails.thumbnails?.default?.url || '',
+    uploadDate: videoDetails.publishedAt || new Date().toISOString(),
+    isShort: url.includes('/shorts/'),
   };
+}
+
+function extractVideoId(url: string): string | null {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
 }

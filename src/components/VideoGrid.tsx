@@ -15,7 +15,7 @@ interface VideoGridProps {
 
 const VideoGrid: React.FC<VideoGridProps> = ({ videos }) => {
   if (!videos || videos.length === 0) {
-    return <p>No videos available.</p>;
+    return <p className="text-black">No videos available.</p>;
   }
 
   return (
