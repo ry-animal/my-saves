@@ -1,52 +1,40 @@
 import { GetServerSideProps, NextPage } from 'next';
-import { useRouter } from 'next/router';
 import { getVideoDetails, Video } from '../../lib/videos';
-import SEO from '../../components/SEO';
-import VideoPlayer from '../../components/Player';
+import Player from '@/components/Player';
 
 interface VideoPageProps {
   video: Video;
 }
 
 const VideoPage: NextPage<VideoPageProps> = ({ video }) => {
-  const router = useRouter();
-
-  if (router.isFallback) {
-    return <div>Loading...</div>;
-  }
+  const ytVideoId = extractVideoId(video.url);
 
   return (
-    <>
-      <SEO
-        title={video.title}
-        description={video.description}
-        ogImage={video.thumbnailUrl}
-        ogUrl={`/videos/${video.id}`}
-      />
-      <div className="container mx-auto px-4 py-8 text-black">
-        <h1 className="text-3xl font-bold mb-6">{video.title}</h1>
-        <div className="mb-8">
-          <VideoPlayer videoId={video.id} isShort={video.isShort} title={video.title} />
-        </div>
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-semibold mb-2">Description</h2>
-          <p className="text-gray-700 whitespace-pre-wrap">{video.description}</p>
-        </div>
-      </div>
-    </>
+    <div className="container mx-auto px-4 py-8 text-black">
+      <h1 className="text-2xl font-bold m-4 flex justify-between">
+        <span>{video.title}</span>
+        <span>Views: {video.views}</span>
+      </h1>
+      <Player videoId={ytVideoId} id={video.id} isShort={video.isShort} />
+      <p className="mt-4">{video.description}</p>
+    </div>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
+  const video = await getVideoDetails(id);
 
-  try {
-    const video = await getVideoDetails(id);
-    return { props: { video } };
-  } catch (error) {
-    console.error('error fetching video:', error);
+  if (!video) {
     return { notFound: true };
   }
+
+  return { props: { video } };
 };
+
+function extractVideoId(url: string): string {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/watch\?.+&v=))([^\/&#?]{11})/);
+  return (match && match[1]) || '';
+}
 
 export default VideoPage;

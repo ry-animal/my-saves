@@ -71,7 +71,7 @@ export async function getAllVideos(page: number, limit: number, sortBy: 'views' 
         if (isVideoData(videoData)) {
           return videoData;
         } else {
-          console.error(`Invalid video data for id: ${id}`, videoData);
+          console.error(`invalid data for id: ${id}`, videoData);
           return null;
         }
       }),
@@ -82,11 +82,11 @@ export async function getAllVideos(page: number, limit: number, sortBy: 'views' 
     return {
       videos: filteredVideos,
       totalCount,
-      totalPages: Math.ceil(totalCount / limit),
+      totalPages: Math.ceil(totalCount / limit) || 1,
     };
   } catch (error) {
-    console.error('Error fetching videos:', error);
-    return { videos: [], totalCount: 0, totalPages: 0 };
+    console.error('error fetching videos:', error);
+    return { videos: [], totalCount: 0, totalPages: 1 };
   }
 }
 
@@ -96,7 +96,7 @@ export async function getVideoDetails(id: string): Promise<Video | null> {
   if (isVideoData(videoData)) {
     return videoData;
   } else {
-    console.error(`Invalid data for id: ${id}`, videoData);
+    console.error(`invalid data for id: ${id}`, videoData);
     return null;
   }
 }
@@ -129,14 +129,28 @@ export function extractVideoInfo(url: string): { videoId: string; isShort: boole
 }
 
 export async function incrementViewCount(id: string): Promise<number> {
-  const video = await getVideoDetails(id);
-  if (!video) {
-    throw new Error(`Video with id ${id} not found`);
+  console.log(`Attempting to increment view count for video ${id}`);
+
+  try {
+    const video = await getVideoDetails(id);
+    if (!video) {
+      console.error(`Video ${id} not found`);
+      throw new Error(`Video ${id} not found`);
+    }
+
+    console.log(`Current view count for video ${id}: ${video.views}`);
+    const newViewCount = video.views + 1;
+    console.log(`New view count will be: ${newViewCount}`);
+
+    await kv.set(`video:${id}`, { ...video, views: newViewCount });
+    console.log(`Updated video:${id} in KV store`);
+
+    await kv.zadd('video_views', { score: newViewCount, member: id });
+    console.log(`Updated video_views sorted set`);
+
+    return newViewCount;
+  } catch (error) {
+    console.error(`Error updating view count for video ${id}:`, error);
+    throw error;
   }
-
-  const newViewCount = video.views + 1;
-  await kv.set(`video:${id}`, { ...video, views: newViewCount });
-  await kv.zadd('video_views', { score: newViewCount, member: id });
-
-  return newViewCount;
 }

@@ -14,10 +14,10 @@ const VideoGrid: React.FC<VideoGridProps> = ({ videos }) => {
   }
 
   return (
-    <GridLayout columns={4}>
+    <GridLayout columns={3}>
       {videos.map((video) => (
         <Link href={`/videos/${video.id}`} key={video.id}>
-          <div className="border rounded-lg overflow-hidden shadow-lg">
+          <div className="border rounded-lg overflow-hidden shadow-lg m-4">
             <div className="relative h-48">
               <Image src={video.thumbnailUrl} alt={video.title} layout="fill" objectFit="cover" />
             </div>

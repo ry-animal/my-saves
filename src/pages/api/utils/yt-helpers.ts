@@ -23,33 +23,38 @@ export function extractVideoInfo(url: string): { videoId: string; isShort: boole
 }
 
 export async function fetchYouTubeVideoDetails(url: string) {
-  const videoId = extractVideoId(url);
-  if (!videoId) {
-    throw new Error('invalid url');
+  try {
+    console.log('Extracting video info from URL:', url);
+    const { videoId, isShort } = extractVideoInfo(url);
+    console.log('Extracted video ID:', videoId, 'Is Short:', isShort);
+
+    console.log('Fetching video details from YouTube API');
+    const response = await youtube.videos.list({
+      part: ['snippet', 'contentDetails'],
+      id: [videoId],
+    });
+
+    const videoDetails = response.data.items?.[0];
+    if (!videoDetails) {
+      console.error('No video details returned from YouTube API');
+      throw new Error('no video found on youtube');
+    }
+
+    console.log('Video details fetched successfully');
+    return {
+      url,
+      title: videoDetails.snippet?.title || 'Untitled Video',
+      description: videoDetails.snippet?.description || 'No description available',
+      thumbnailUrl: videoDetails.snippet?.thumbnails?.high?.url || videoDetails.snippet?.thumbnails?.default?.url || '',
+      uploadDate: videoDetails.snippet?.publishedAt || new Date().toISOString(),
+      isShort,
+    };
+  } catch (error) {
+    console.error('Error in fetchYouTubeVideoDetails:', error);
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch video details: ${error.message}`);
+    } else {
+      throw new Error('An unexpected error occurred while fetching video details');
+    }
   }
-
-  const response = await youtube.videos.list({
-    part: ['snippet'],
-    id: [videoId],
-  });
-
-  const videoDetails = response.data.items?.[0]?.snippet;
-  if (!videoDetails) {
-    throw new Error('no video found on youtube');
-  }
-
-  return {
-    url,
-    title: videoDetails.title || 'Untitled Video',
-    description: videoDetails.description || 'no description',
-    thumbnailUrl: videoDetails.thumbnails?.high?.url || videoDetails.thumbnails?.default?.url || '',
-    uploadDate: videoDetails.publishedAt || new Date().toISOString(),
-    isShort: url.includes('/shorts/'),
-  };
-}
-
-function extractVideoId(url: string): string | null {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
-  return match && match[2].length === 11 ? match[2] : null;
 }

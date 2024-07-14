@@ -57,7 +57,7 @@ const Explore: NextPage<ExploreProps> = ({ videos, currentPage, totalPages }) =>
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const page = Number(context.query.page) || 1;
-  const limit = 12; // Number of videos per page
+  const limit = 12;
 
   try {
     const { videos, totalPages } = await getAllVideos(page, limit, 'date');
