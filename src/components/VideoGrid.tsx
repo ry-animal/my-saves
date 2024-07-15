@@ -10,7 +10,7 @@ interface VideoGridProps {
 
 const VideoGrid: React.FC<VideoGridProps> = ({ videos }) => {
   if (!videos || videos.length === 0) {
-    return <p className="text-black">No videos available.</p>;
+    return <p className="text-white">No videos available.</p>;
   }
 
   return (
@@ -22,9 +22,7 @@ const VideoGrid: React.FC<VideoGridProps> = ({ videos }) => {
               <Image src={video.thumbnailUrl} alt={video.title} layout="fill" objectFit="cover" />
             </div>
             <div className="p-4">
-              <h3 className="text-lg font-semibold truncate text-black">{video.title}</h3>
-
-              <h3 className="text-lg font-semibold truncate text-black">Views: {video.views}</h3>
+              <h3 className="text-lg font-semibold truncate text-white">{video.title}</h3>
             </div>
           </div>
         </Link>

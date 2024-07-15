@@ -47,7 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'MySaves' }) => {
       </header>
 
       <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg">{children}</div>
+        <div className="p-6 rounded-lg shadow-lg">{children}</div>
       </main>
 
       <footer className="bg-black/10 py-4 mt-8 shadow-sm flex justify-center items-center gap-2">

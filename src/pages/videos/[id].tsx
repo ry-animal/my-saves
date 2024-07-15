@@ -1,40 +1,111 @@
-import { GetServerSideProps, NextPage } from 'next';
-import { getVideoDetails, Video } from '../../lib/videos';
 import Player from '@/components/Player';
+import { extractVideoId, Video } from '@/lib/videos';
+import { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import { useEffect, useState, useCallback } from 'react';
+import ErrorPage from '../_error';
 
-interface VideoPageProps {
-  video: Video;
-}
+const VideoPage: NextPage = () => {
+  const router = useRouter();
+  const { id } = router.query;
+  const [video, setVideo] = useState<Video | null>(null);
+  const [error, setError] = useState<{ statusCode: number } | null>(null);
 
-const VideoPage: NextPage<VideoPageProps> = ({ video }) => {
-  const ytVideoId = extractVideoId(video.url);
+  const fetchVideoDetails = useCallback(async () => {
+    if (typeof id !== 'string') return;
+
+    try {
+      const response = await fetch(`/api/videos/${id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setVideo(data);
+      } else {
+        setError({ statusCode: response.status });
+      }
+    } catch (error) {
+      console.error('Error fetching video details:', error);
+      setError({ statusCode: 500 });
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchVideoDetails();
+  }, [fetchVideoDetails]);
+
+  const handleDelete = async () => {
+    if (!id || typeof id !== 'string') return;
+
+    if (confirm('Are you sure you want to delete this video?')) {
+      try {
+        const response = await fetch(`/api/videos/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+          router.push('/');
+        } else {
+          throw new Error('Failed to delete video');
+        }
+      } catch (error) {
+        console.error('Failed to delete video:', error);
+        alert('Failed to delete video. Please try again.');
+      }
+    }
+  };
+
+  const handleNextVideo = async () => {
+    try {
+      const response = await fetch('/api/videos/random');
+      if (response.ok) {
+        const { id: nextVideoId } = await response.json();
+        if (nextVideoId) {
+          router.push(`/videos/${nextVideoId}`);
+        } else {
+          alert('No more videos available.');
+        }
+      } else {
+        throw new Error('Failed to get next video');
+      }
+    } catch (error) {
+      console.error('Error getting next video:', error);
+      alert('Failed to get next video. Please try again.');
+    }
+  };
+
+  if (error) {
+    return <ErrorPage statusCode={error.statusCode} />;
+  }
+
+  if (!video) {
+    return <div>Loading...</div>;
+  }
+
+  let ytId;
+  try {
+    ytId = extractVideoId(video.url);
+  } catch (err) {
+    console.error('Failed to extract video ID:', err);
+    return <ErrorPage statusCode={400} />;
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 text-black">
-      <h1 className="text-2xl font-bold m-4 flex justify-between">
-        <span>{video.title}</span>
-        <span>Views: {video.views}</span>
-      </h1>
-      <Player videoId={ytVideoId} id={video.id} isShort={video.isShort} />
-      <p className="mt-4">{video.description}</p>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-4">{video.title}</h1>
+      <Player videoId={ytId} isShort={video.isShort} />
+      {video.description && <p className="mt-4">{video.description}</p>}
+      <div className="mt-4 space-x-4 font-broadway flex justify-between items-center text-xl md:text-xxl">
+        <button
+          onClick={handleDelete}
+          className="flex-1 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
+        >
+          Delete Video
+        </button>
+        <button
+          onClick={handleNextVideo}
+          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
+        >
+          Stumble Videos
+        </button>
+      </div>
     </div>
   );
 };
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params as { id: string };
-  const video = await getVideoDetails(id);
-
-  if (!video) {
-    return { notFound: true };
-  }
-
-  return { props: { video } };
-};
-
-function extractVideoId(url: string): string {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/watch\?.+&v=))([^\/&#?]{11})/);
-  return (match && match[1]) || '';
-}
 
 export default VideoPage;

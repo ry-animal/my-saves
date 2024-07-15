@@ -40,10 +40,10 @@ const SubmitPage: NextPage = () => {
     <>
       <SEO title="Submit a Video" description="Add a new YouTube video to MySaves" ogUrl="/submit" />
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-black">Submit a Video</h1>
+        <h1 className="text-3xl font-bold mb-6 text-white">Submit a Video</h1>
         <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
           <div className="mb-4">
-            <label htmlFor="url" className="block text-gray-700 text-sm font-bold mb-2">
+            <label htmlFor="url" className="block text-white text-sm font-bold mb-2">
               YouTube URL
             </label>
             <input
@@ -57,10 +57,10 @@ const SubmitPage: NextPage = () => {
             />
           </div>
           {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between font-broadway text-xxl">
             <button
               type="submit"
-              className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${
+              className={`bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded focus:outline-none focus:shadow-outline ${
                 isLoading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               disabled={isLoading}

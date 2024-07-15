@@ -4,12 +4,16 @@ const nextConfig = {
   images: {
     domains: ['i.ytimg.com'],
   },
-  webpack(config) {
-    config.module.rules.push({
-      test: /\.(woff|woff2|eot|ttf|otf)$/i,
-      issuer: { and: [/\.(js|ts|md)x?$/] },
-      type: 'asset/resource',
-    });
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        child_process: false,
+      };
+    }
     return config;
   },
 };

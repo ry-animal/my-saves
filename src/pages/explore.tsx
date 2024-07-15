@@ -26,7 +26,7 @@ const Explore: NextPage<ExploreProps> = ({ videos, currentPage, totalPages }) =>
         ogImage="/og-explore.jpg"
         ogUrl="/explore"
       />
-      <main className="container mx-auto px-4 py-8 text-black">
+      <main className="container mx-auto px-4 py-8 text-white">
         <h1 className="text-3xl font-bold mb-6">Explore All Videos</h1>
         {videos.length > 0 ? <VideoGrid videos={videos} /> : <p>No videos available. Start by adding some!</p>}
         <div className="mt-8 flex justify-center space-x-4">
@@ -60,7 +60,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const limit = 12;
 
   try {
-    const { videos, totalPages } = await getAllVideos(page, limit, 'date');
+    const { videos, totalPages } = await getAllVideos(page, limit);
     return {
       props: {
         videos,

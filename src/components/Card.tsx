@@ -6,10 +6,9 @@ interface CardProps {
   id: string;
   title: string;
   thumbnailUrl: string;
-  views?: number;
 }
 
-const Card: React.FC<CardProps> = ({ id, title, thumbnailUrl, views }) => {
+const Card: React.FC<CardProps> = ({ id, title, thumbnailUrl }) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-110">
       <Link href={`/videos/${id}`}>
@@ -27,7 +26,6 @@ const Card: React.FC<CardProps> = ({ id, title, thumbnailUrl, views }) => {
         </div>
         <div className="p-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">{title}</h3>
-          {views !== undefined && <p className="text-sm text-gray-600">{views.toLocaleString()} views</p>}
         </div>
       </Link>
     </div>

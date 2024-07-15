@@ -13,6 +13,7 @@ const config: Config = {
         aliens: ['aliens', 'sans-serif'],
       },
       fontSize: {
+        xxl: '1.75rem',
         '7xl': '5rem',
       },
     },

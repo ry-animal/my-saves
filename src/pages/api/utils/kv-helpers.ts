@@ -2,20 +2,31 @@ import { Video } from '@/lib/videos';
 import { kv } from '@vercel/kv';
 import { v4 as uuid4 } from 'uuid';
 
-export async function saveVideo(videoDetails: Omit<Video, 'id' | 'createdAt' | 'views'>) {
-  const id = uuid4();
-  const savedVideo: Video = {
-    ...videoDetails,
-    id,
-    createdAt: new Date().toISOString(),
-    views: 0,
-  };
+export async function saveVideo(url: string) {
+  try {
+    const response = await fetch(`/api/video-details?url=${encodeURIComponent(url)}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch video details');
+    }
+    const videoDetails = await response.json();
 
-  await kv.set(`video:${id}`, savedVideo);
-  await kv.lpush('all_videos', id);
-  await kv.zadd('video_views', { score: 0, member: id });
+    const id = uuid4();
+    const savedVideo = {
+      ...videoDetails,
+      id,
+      createdAt: new Date().toISOString(),
+      views: 0,
+    };
 
-  return savedVideo;
+    await kv.set(`video:${id}`, savedVideo);
+    await kv.lpush('all_videos', id);
+    await kv.zadd('video_views', { score: 0, member: id });
+
+    return savedVideo;
+  } catch (error) {
+    console.error('Error saving video:', error);
+    throw error;
+  }
 }
 
 export async function getAllVideos(page: number, limit: number) {
@@ -28,12 +39,8 @@ export async function getAllVideos(page: number, limit: number) {
   const videos = await Promise.all(
     videoIds.map(async (id) => {
       const videoData = (await kv.get(`video:${id}`)) as Video | null;
-      const viewsData = await kv.get(`views:${id}`);
-      const views =
-        typeof viewsData === 'number' ? viewsData : typeof viewsData === 'string' ? parseInt(viewsData, 10) : 0;
-
       if (videoData) {
-        return { ...videoData, views };
+        return { ...videoData };
       } else {
         console.error(`Invalid video data for id: ${id}`, videoData);
         return null;

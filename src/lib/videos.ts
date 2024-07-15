@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import { kv } from '@vercel/kv';
-import { google } from 'googleapis';
 
 export interface Video {
   id: string;
@@ -11,14 +10,15 @@ export interface Video {
   uploadDate: string;
   isShort: boolean;
   createdAt: string;
-  views: number;
 }
 
-export async function saveVideo(videoDetails: Omit<Video, 'id' | 'createdAt'>) {
+export async function saveVideo(videoDetails: Omit<Video, 'id' | 'createdAt' | 'views'>) {
   const id = uuidv4();
+  const isShort = videoDetails.url.includes('/shorts/');
   const savedVideo: Video = {
     ...videoDetails,
     id,
+    isShort,
     createdAt: new Date().toISOString(),
   };
 
@@ -29,7 +29,7 @@ export async function saveVideo(videoDetails: Omit<Video, 'id' | 'createdAt'>) {
   return savedVideo;
 }
 
-function isVideoData(data: unknown): data is Video {
+export function isVideoData(data: unknown): data is Video {
   return (
     typeof data === 'object' &&
     data !== null &&
@@ -40,28 +40,16 @@ function isVideoData(data: unknown): data is Video {
     'url' in data &&
     'isShort' in data &&
     'createdAt' in data &&
-    'views' in data &&
     'uploadDate' in data
   );
 }
 
-export const youtube = google.youtube({
-  version: 'v3',
-  auth: process.env.YOUTUBE_API_KEY,
-});
-
-export async function getAllVideos(page: number, limit: number, sortBy: 'views' | 'date' = 'date') {
+export async function getAllVideos(page: number, limit: number) {
   try {
     const start = (page - 1) * limit;
     const end = start + limit - 1;
 
-    let videoIds: string[];
-    if (sortBy === 'views') {
-      videoIds = await kv.zrange('video_views', 0, -1, { rev: true });
-      videoIds = videoIds.slice(start, end + 1);
-    } else {
-      videoIds = await kv.lrange('all_videos', start, end);
-    }
+    const videoIds = await kv.lrange('all_videos', start, end);
 
     const totalCount = await kv.llen('all_videos');
 
@@ -91,12 +79,17 @@ export async function getAllVideos(page: number, limit: number, sortBy: 'views' 
 }
 
 export async function getVideoDetails(id: string): Promise<Video | null> {
-  const videoData = await kv.get(`video:${id}`);
+  try {
+    const videoData = await kv.get(`video:${id}`);
 
-  if (isVideoData(videoData)) {
-    return videoData;
-  } else {
-    console.error(`invalid data for id: ${id}`, videoData);
+    if (isVideoData(videoData)) {
+      return videoData;
+    } else {
+      console.error(`Invalid data for id: ${id}`, videoData);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error fetching video details for id ${id}:`, error);
     return null;
   }
 }
@@ -128,29 +121,36 @@ export function extractVideoInfo(url: string): { videoId: string; isShort: boole
   throw new Error('invalid url');
 }
 
-export async function incrementViewCount(id: string): Promise<number> {
-  console.log(`Attempting to increment view count for video ${id}`);
-
+export async function getRandomVideoId(excludeId?: string): Promise<string | null> {
   try {
-    const video = await getVideoDetails(id);
-    if (!video) {
-      console.error(`Video ${id} not found`);
-      throw new Error(`Video ${id} not found`);
-    }
+    const allVideoIds = await kv.lrange('all_videos', 0, -1);
+    const availableIds = excludeId ? allVideoIds.filter((id) => id !== excludeId) : allVideoIds;
 
-    console.log(`Current view count for video ${id}: ${video.views}`);
-    const newViewCount = video.views + 1;
-    console.log(`New view count will be: ${newViewCount}`);
+    if (availableIds.length === 0) return null;
 
-    await kv.set(`video:${id}`, { ...video, views: newViewCount });
-    console.log(`Updated video:${id} in KV store`);
-
-    await kv.zadd('video_views', { score: newViewCount, member: id });
-    console.log(`Updated video_views sorted set`);
-
-    return newViewCount;
+    const randomIndex = Math.floor(Math.random() * availableIds.length);
+    return availableIds[randomIndex];
   } catch (error) {
-    console.error(`Error updating view count for video ${id}:`, error);
-    throw error;
+    console.error('Error getting random video ID:', error);
+    return null;
   }
+}
+
+export function extractVideoId(url: string): string {
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^/?]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([^/?]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([^/?]+)/,
+    /(?:https?:\/\/)?youtu\.be\/([^/?]+)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  throw new Error('Could not extract video ID from URL');
 }
