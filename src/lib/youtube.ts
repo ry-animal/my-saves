@@ -1,3 +1,5 @@
+import { youtube } from '@/pages/api/videos/video-details';
+
 export async function getYoutubeVideoDetails(videoId: string) {
   try {
     const response = await youtube.videos.list({
