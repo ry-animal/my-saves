@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { saveVideo, extractVideoInfo } from '../../../lib/videos';
-import { getYoutubeVideoDetails } from '@/lib/youtube';
+import { extractVideoInfo, getYoutubeVideoDetails } from '@/lib/youtube';
+import { saveVideo } from '@/lib/videos';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {

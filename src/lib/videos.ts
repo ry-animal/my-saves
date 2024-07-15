@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
 import { kv } from '@vercel/kv';
-import { getYoutubeVideoDetails } from './youtube';
+import { extractVideoInfo, getYoutubeVideoDetails } from './youtube';
 
 export interface Video {
   id: string;
@@ -103,23 +103,6 @@ export async function deleteVideo(id: string) {
     console.error(`error deleting video ${id}:`, error);
     throw error;
   }
-}
-
-export function extractVideoInfo(url: string): { videoId: string; isShort: boolean } {
-  const shortRegExp = /^.*(youtu.be\/|youtube.com\/shorts\/)([^#\&\?]*).*/;
-  const standardRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-
-  let match = url.match(shortRegExp);
-  if (match && match[2].length === 11) {
-    return { videoId: match[2], isShort: true };
-  }
-
-  match = url.match(standardRegExp);
-  if (match && match[2].length === 11) {
-    return { videoId: match[2], isShort: false };
-  }
-
-  throw new Error('invalid url');
 }
 
 export async function getRandomVideoId(excludeId?: string): Promise<string | null> {

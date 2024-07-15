@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Player from '@/components/Player';
 import { Video, extractVideoId, getVideoDetails } from '@/lib/videos';
 import ErrorPage from '../_error';
+import Head from 'next/head';
 
 interface VideoPageProps {
   video: Video | null;
@@ -51,27 +52,43 @@ const VideoPage: NextPage<VideoPageProps> = ({ video }) => {
   };
 
   const ytId = extractVideoId(video.url);
+  const fullUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/videos/${video.id}`;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">{video.title}</h1>
-      <Player videoId={ytId} isShort={video.isShort} />
-      {video.description && <p className="mt-4">{video.description}</p>}
-      <div className="mt-4 space-x-4 font-broadway flex justify-between items-center text-xl md:text-xxl">
-        <button
-          onClick={handleDelete}
-          className="flex-1 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
-        >
-          Delete Video
-        </button>
-        <button
-          onClick={handleNextVideo}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
-        >
-          Stumble Videos
-        </button>
+    <>
+      <Head>
+        <title>{video.title} | MySaves</title>
+        <meta name="description" content={video.description || 'Watch this video on MySaves'} />
+        <meta property="og:title" content={video.title} />
+        <meta property="og:description" content={video.description || 'Watch this video on MySaves'} />
+        <meta property="og:image" content={video.thumbnailUrl} />
+        <meta property="og:url" content={fullUrl} />
+        <meta property="og:type" content="video.other" />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:title" content={video.title} />
+        <meta property="twitter:description" content={video.description || 'Watch this video on MySaves'} />
+        <meta property="twitter:image" content={video.thumbnailUrl} />
+      </Head>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-4">{video.title}</h1>
+        <Player videoId={ytId} isShort={video.isShort} />
+        {video.description && <p className="mt-4">{video.description}</p>}
+        <div className="mt-4 space-x-4 font-broadway flex justify-between items-center text-xl md:text-xxl">
+          <button
+            onClick={handleDelete}
+            className="flex-1 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
+          >
+            Delete Video
+          </button>
+          <button
+            onClick={handleNextVideo}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
+          >
+            Stumble Videos
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

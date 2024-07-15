@@ -15,7 +15,7 @@ const Home: NextPage<HomeProps> = ({ videos }) => {
       <SEO
         title="MySaves - Save and Share YouTube Videos"
         description="Save, share, and stream your favorite YouTube videos in one place."
-        ogImage="/og.jpg"
+        ogImage="/cinema.webp"
         ogUrl="/"
       />
       <main className="container mx-auto px-4 py-8 text-white">

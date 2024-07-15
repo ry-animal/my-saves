@@ -12,7 +12,7 @@ const Custom404: React.FC = () => {
         title="Page Not Found"
         description="The page you're looking for doesn't exist."
         ogUrl="/404"
-        ogImage="/og.jpg"
+        ogImage="/cinema.webp"
       />
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">

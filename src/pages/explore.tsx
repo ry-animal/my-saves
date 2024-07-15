@@ -23,7 +23,7 @@ const Explore: NextPage<ExploreProps> = ({ videos, currentPage, totalPages }) =>
       <SEO
         title="Explore Videos - MySaves"
         description="Explore all saved videos on MySaves."
-        ogImage="/og.jpg"
+        ogImage="/cinema.webp"
         ogUrl="/explore"
       />
       <main className="container mx-auto px-4 py-8 text-white">

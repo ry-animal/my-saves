@@ -38,7 +38,12 @@ const SubmitPage: NextPage = () => {
 
   return (
     <>
-      <SEO title="Submit a Video" description="Add a new YouTube video to MySaves" ogUrl="/submit" ogImage="/og.jpg" />
+      <SEO
+        title="Submit a Video"
+        description="Add a new YouTube video to MySaves"
+        ogUrl="/submit"
+        ogImage="/cinema.webp"
+      />
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6 text-white">Submit a Video</h1>
         <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
