@@ -74,7 +74,11 @@ const VideoPage: NextPage<VideoPageProps> = ({ video }) => {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-4">{video.title}</h1>
         <Player videoId={ytId} isShort={video.isShort} />
-        {video.description && <p className="mt-4">{video.description}</p>}
+        {video.description && (
+          <p className="mt-4 break-words overflow-wrap-normal" style={{ wordWrap: 'break-word' }}>
+            {video.description}
+          </p>
+        )}
         <div className="mt-4 space-x-4 font-broadway flex justify-between items-center text-xl md:text-xxl">
           <button
             onClick={handleDelete}
