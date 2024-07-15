@@ -4,6 +4,19 @@ const nextConfig = {
   images: {
     domains: ['i.ytimg.com'],
   },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-src 'self' https://www.youtube.com",
+          },
+        ],
+      },
+    ];
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -12,6 +25,7 @@ const nextConfig = {
         net: false,
         tls: false,
         child_process: false,
+        http2: false,
       };
     }
     return config;

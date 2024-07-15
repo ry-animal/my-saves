@@ -17,25 +17,25 @@ const Player: React.FC<PlayerProps> = ({ videoId, isShort }) => {
   const playerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Load the YouTube IFrame Player API code asynchronously
     const tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
-    console.log('videoId', videoId);
-
+    // Function to initialize the player
     const initializePlayer = () => {
       new window.YT.Player(playerRef.current, {
         videoId: videoId,
         playerVars: {
-          autoplay: 1,
+          autoplay: 0,
           playsinline: 1,
           loop: isShort ? 1 : 0,
           playlist: isShort ? videoId : undefined,
         },
         events: {
-          onReady: (event: any) => {
-            event.target.playVideo();
+          onError: (event: any) => {
+            console.error('YouTube Player Error:', event.data);
           },
         },
       });

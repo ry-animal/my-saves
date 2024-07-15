@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
         .map(
           (id) => `
         <url>
-          <loc>${baseUrl}/videos/${id}</loc>
+          <loc>${baseUrl}/videos/${id.id}</loc>
           <lastmod>${new Date().toISOString()}</lastmod>
           <changefreq>weekly</changefreq>
           <priority>0.8</priority>

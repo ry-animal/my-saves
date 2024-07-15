@@ -1,43 +1,24 @@
-import Player from '@/components/Player';
-import { extractVideoId, Video } from '@/lib/videos';
-import { NextPage } from 'next';
+import { NextPage, GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import { useEffect, useState, useCallback } from 'react';
+import Player from '@/components/Player';
+import { Video, extractVideoId, getVideoDetails } from '@/lib/videos';
 import ErrorPage from '../_error';
 
-const VideoPage: NextPage = () => {
+interface VideoPageProps {
+  video: Video | null;
+}
+
+const VideoPage: NextPage<VideoPageProps> = ({ video }) => {
   const router = useRouter();
-  const { id } = router.query;
-  const [video, setVideo] = useState<Video | null>(null);
-  const [error, setError] = useState<{ statusCode: number } | null>(null);
 
-  const fetchVideoDetails = useCallback(async () => {
-    if (typeof id !== 'string') return;
-
-    try {
-      const response = await fetch(`/api/videos/${id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setVideo(data);
-      } else {
-        setError({ statusCode: response.status });
-      }
-    } catch (error) {
-      console.error('Error fetching video details:', error);
-      setError({ statusCode: 500 });
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchVideoDetails();
-  }, [fetchVideoDetails]);
+  if (!video) {
+    return <ErrorPage statusCode={404} />;
+  }
 
   const handleDelete = async () => {
-    if (!id || typeof id !== 'string') return;
-
     if (confirm('Are you sure you want to delete this video?')) {
       try {
-        const response = await fetch(`/api/videos/${id}`, { method: 'DELETE' });
+        const response = await fetch(`/api/videos/${video.id}`, { method: 'DELETE' });
         if (response.ok) {
           router.push('/');
         } else {
@@ -69,21 +50,7 @@ const VideoPage: NextPage = () => {
     }
   };
 
-  if (error) {
-    return <ErrorPage statusCode={error.statusCode} />;
-  }
-
-  if (!video) {
-    return <div>Loading...</div>;
-  }
-
-  let ytId;
-  try {
-    ytId = extractVideoId(video.url);
-  } catch (err) {
-    console.error('Failed to extract video ID:', err);
-    return <ErrorPage statusCode={400} />;
-  }
+  const ytId = extractVideoId(video.url);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -106,6 +73,12 @@ const VideoPage: NextPage = () => {
       </div>
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params as { id: string };
+  const video = await getVideoDetails(id);
+  return { props: { video } };
 };
 
 export default VideoPage;

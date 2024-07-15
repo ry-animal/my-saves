@@ -1,6 +1,20 @@
-import { youtube } from '@/pages/api/videos/video-details';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { google } from 'googleapis';
+
+let youtube: any;
+
+if (typeof window === 'undefined') {
+  youtube = google.youtube({
+    version: 'v3',
+    auth: process.env.YOUTUBE_API_KEY,
+  });
+}
 
 export async function getYoutubeVideoDetails(videoId: string) {
+  if (typeof window !== 'undefined') {
+    throw new Error('YouTube API can only be used on the server side');
+  }
+
   try {
     const response = await youtube.videos.list({
       part: ['snippet'],
