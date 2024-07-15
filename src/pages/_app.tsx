@@ -4,8 +4,11 @@ import RootLayout from './layout/RootLayout';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <RootLayout>
-      <Component {...pageProps} />
-    </RootLayout>
+    <>
+      <DefaultSEO />
+      <RootLayout>
+        <Component {...pageProps} />
+      </RootLayout>
+    </>
   );
 }

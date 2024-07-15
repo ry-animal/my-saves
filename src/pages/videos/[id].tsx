@@ -52,22 +52,24 @@ const VideoPage: NextPage<VideoPageProps> = ({ video }) => {
   };
 
   const ytId = extractVideoId(video.url);
-  const fullUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/videos/${video.id}`;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://my-saves.vercel.app'; // Replace with your actual base URL
+  const fullUrl = `${baseUrl}/videos/${video.id}`;
 
   return (
     <>
       <Head>
-        <title>{video.title} | MySaves</title>
-        <meta name="description" content={video.description || 'Watch this video on MySaves'} />
-        <meta property="og:title" content={video.title} />
-        <meta property="og:description" content={video.description || 'Watch this video on MySaves'} />
+        <title>{`${video.title} | MySaves`}</title>
+        <meta name="description" content={video.description || `Watch "${video.title}" on MySaves`} />
+        <meta property="og:title" content={`${video.title} | MySaves`} />
+        <meta property="og:description" content={video.description || `Watch "${video.title}" on MySaves`} />
         <meta property="og:image" content={video.thumbnailUrl} />
         <meta property="og:url" content={fullUrl} />
         <meta property="og:type" content="video.other" />
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:title" content={video.title} />
-        <meta property="twitter:description" content={video.description || 'Watch this video on MySaves'} />
-        <meta property="twitter:image" content={video.thumbnailUrl} />
+        <meta property="og:site_name" content="MySaves" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${video.title} | MySaves`} />
+        <meta name="twitter:description" content={video.description || `Watch "${video.title}" on MySaves`} />
+        <meta name="twitter:image" content={video.thumbnailUrl} />
       </Head>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-4">{video.title}</h1>

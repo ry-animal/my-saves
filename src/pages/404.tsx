@@ -1,19 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import SEO from '../components/SEO';
 
 const Custom404: React.FC = () => {
   const router = useRouter();
 
   return (
     <>
-      <SEO
-        title="Page Not Found"
-        description="The page you're looking for doesn't exist."
-        ogUrl="/404"
-        ogImage="/cinema.webp"
-      />
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
           <h1 className="text-6xl font-bold text-gray-800 mb-4">404</h1>

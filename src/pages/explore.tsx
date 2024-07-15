@@ -1,7 +1,6 @@
 import type { NextPage } from 'next';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import SEO from '../components/SEO';
 import VideoGrid from '../components/VideoGrid';
 import { getAllVideos, Video } from '../lib/videos';
 
@@ -20,12 +19,6 @@ const Explore: NextPage<ExploreProps> = ({ videos, currentPage, totalPages }) =>
 
   return (
     <>
-      <SEO
-        title="Explore Videos - MySaves"
-        description="Explore all saved videos on MySaves."
-        ogImage="/cinema.webp"
-        ogUrl="/explore"
-      />
       <main className="container mx-auto px-4 py-8 text-white">
         <h1 className="text-3xl font-bold mb-6">Explore All Videos</h1>
         {videos.length > 0 ? <VideoGrid videos={videos} /> : <p>No videos available. Start by adding some!</p>}
