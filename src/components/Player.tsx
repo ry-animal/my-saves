@@ -15,28 +15,43 @@ declare global {
 
 const Player: React.FC<PlayerProps> = ({ videoId, isShort }) => {
   const playerRef = useRef<HTMLDivElement>(null);
+  const playerInstanceRef = useRef<any>(null);
 
   useEffect(() => {
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
 
     const initializePlayer = () => {
-      new window.YT.Player(playerRef.current, {
-        videoId: videoId,
-        playerVars: {
-          autoplay: 0,
-          playsinline: 1,
-          loop: isShort ? 1 : 0,
-          playlist: isShort ? videoId : undefined,
-        },
-        events: {
-          onError: (event: any) => {
-            console.error('YouTube Player Error:', event.data);
+      if (playerInstanceRef.current) {
+        playerInstanceRef.current.loadVideoById({
+          videoId: videoId,
+          startSeconds: 0,
+        });
+      } else {
+        playerInstanceRef.current = new window.YT.Player(playerRef.current, {
+          videoId: videoId,
+          playerVars: {
+            autoplay: 1,
+            playsinline: 1,
+            loop: isShort ? 1 : 0,
+            playlist: isShort ? videoId : undefined,
+            mute: 1,
           },
-        },
-      });
+          events: {
+            onReady: (event: any) => {
+              event.target.unMute();
+              event.target.playVideo();
+            },
+            onError: (event: any) => {
+              console.error('YouTube Player Error:', event.data);
+            },
+          },
+        });
+      }
     };
 
     if (window.YT && window.YT.Player) {
@@ -46,7 +61,10 @@ const Player: React.FC<PlayerProps> = ({ videoId, isShort }) => {
     }
 
     return () => {
-      window.onYouTubeIframeAPIReady = () => {};
+      if (playerInstanceRef.current) {
+        playerInstanceRef.current.destroy();
+        playerInstanceRef.current = null;
+      }
     };
   }, [videoId, isShort]);
 
