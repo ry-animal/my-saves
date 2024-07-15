@@ -1,5 +1,7 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
 import { kv } from '@vercel/kv';
+import { getYoutubeVideoDetails } from './youtube';
 
 export interface Video {
   id: string;
@@ -44,37 +46,36 @@ export function isVideoData(data: unknown): data is Video {
   );
 }
 
-export async function getAllVideos(page: number, limit: number) {
-  try {
-    const start = (page - 1) * limit;
-    const end = start + limit - 1;
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'POST') {
+    const { url } = req.body;
 
-    const videoIds = await kv.lrange('all_videos', start, end);
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
 
-    const totalCount = await kv.llen('all_videos');
+    try {
+      const { videoId, isShort } = extractVideoInfo(url);
+      const youtubeData = await getYoutubeVideoDetails(videoId);
 
-    const videos = await Promise.all(
-      videoIds.map(async (id) => {
-        const videoData = await kv.get(`video:${id}`);
-        if (isVideoData(videoData)) {
-          return videoData;
-        } else {
-          console.error(`invalid data for id: ${id}`, videoData);
-          return null;
-        }
-      }),
-    );
+      const videoDetails = {
+        url,
+        title: youtubeData.title,
+        description: youtubeData.description,
+        thumbnailUrl: youtubeData.thumbnailUrl,
+        uploadDate: youtubeData.uploadDate,
+        isShort,
+      };
 
-    const filteredVideos = videos.filter((video): video is Video => video !== null);
-
-    return {
-      videos: filteredVideos,
-      totalCount,
-      totalPages: Math.ceil(totalCount / limit) || 1,
-    };
-  } catch (error) {
-    console.error('error fetching videos:', error);
-    return { videos: [], totalCount: 0, totalPages: 1 };
+      const savedVideo = await saveVideo(videoDetails);
+      res.status(201).json(savedVideo);
+    } catch (error) {
+      console.error('Error submitting video:', error);
+      res.status(500).json({ error: 'Failed to submit video' });
+    }
+  } else {
+    res.setHeader('Allow', ['POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
 
@@ -153,4 +154,55 @@ export function extractVideoId(url: string): string {
   }
 
   throw new Error('Could not extract video ID from URL');
+}
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+export async function getAllVideos(page: number, limit: number, random: boolean = false) {
+  try {
+    const totalCount = await kv.llen('all_videos');
+    let videoIds: string[];
+
+    if (random) {
+      // For random selection (e.g., home page)
+      const allVideoIds = await kv.lrange('all_videos', 0, -1);
+      const shuffledIds = shuffleArray(allVideoIds);
+      videoIds = shuffledIds.slice(0, limit);
+    } else {
+      // For ordered selection with pagination (e.g., explore page)
+      const start = (page - 1) * limit;
+      const end = start + limit - 1;
+      videoIds = await kv.lrange('all_videos', start, end);
+    }
+
+    const videos = await Promise.all(
+      videoIds.map(async (id) => {
+        const videoData = await kv.get(`video:${id}`);
+        if (isVideoData(videoData)) {
+          return videoData;
+        } else {
+          console.error(`Invalid data for id: ${id}`, videoData);
+          return null;
+        }
+      }),
+    );
+
+    const filteredVideos = videos.filter((video): video is Video => video !== null);
+
+    return {
+      videos: filteredVideos,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+    };
+  } catch (error) {
+    console.error('Error fetching videos:', error);
+    return { videos: [], totalCount: 0, totalPages: 1 };
+  }
 }

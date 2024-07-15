@@ -1,9 +1,4 @@
-import { google } from 'googleapis';
-
-const youtube = google.youtube({
-  version: 'v3',
-  auth: process.env.YOUTUBE_API_KEY,
-});
+import { youtube } from '../videos/video-details';
 
 export function extractVideoInfo(url: string): { videoId: string; isShort: boolean } {
   const shortRegExp = /^.*(youtu.be\/|youtube.com\/shorts\/)([^#\&\?]*).*/;

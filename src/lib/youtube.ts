@@ -1,10 +1,3 @@
-import { google } from 'googleapis';
-
-const youtube = google.youtube({
-  version: 'v3',
-  auth: process.env.YOUTUBE_API_KEY,
-});
-
 export async function getYoutubeVideoDetails(videoId: string) {
   try {
     const response = await youtube.videos.list({

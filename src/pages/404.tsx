@@ -8,7 +8,12 @@ const Custom404: React.FC = () => {
 
   return (
     <>
-      <SEO title="Page Not Found" description="The page you're looking for doesn't exist." ogUrl="/404" />
+      <SEO
+        title="Page Not Found"
+        description="The page you're looking for doesn't exist."
+        ogUrl="/404"
+        ogImage="/og.jpg"
+      />
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
           <h1 className="text-6xl font-bold text-gray-800 mb-4">404</h1>

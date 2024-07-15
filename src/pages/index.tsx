@@ -15,7 +15,7 @@ const Home: NextPage<HomeProps> = ({ videos }) => {
       <SEO
         title="MySaves - Save and Share YouTube Videos"
         description="Save, share, and stream your favorite YouTube videos in one place."
-        ogImage="/og-home.jpg"
+        ogImage="/og.jpg"
         ogUrl="/"
       />
       <main className="container mx-auto px-4 py-8 text-white">
@@ -36,7 +36,7 @@ const Home: NextPage<HomeProps> = ({ videos }) => {
 
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
-    const { videos } = await getAllVideos(1, 6);
+    const { videos } = await getAllVideos(1, 6, true);
     return { props: { videos } };
   } catch (error) {
     console.error('Error fetching videos:', error);

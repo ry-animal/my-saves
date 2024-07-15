@@ -6,7 +6,7 @@ import VideoGrid from '../components/VideoGrid';
 import { getAllVideos, Video } from '../lib/videos';
 
 interface ExploreProps {
-  videos: Array<Video>;
+  videos: Video[];
   currentPage: number;
   totalPages: number;
 }
@@ -23,7 +23,7 @@ const Explore: NextPage<ExploreProps> = ({ videos, currentPage, totalPages }) =>
       <SEO
         title="Explore Videos - MySaves"
         description="Explore all saved videos on MySaves."
-        ogImage="/og-explore.jpg"
+        ogImage="/og.jpg"
         ogUrl="/explore"
       />
       <main className="container mx-auto px-4 py-8 text-white">
@@ -59,19 +59,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const page = Number(context.query.page) || 1;
   const limit = 12;
 
-  try {
-    const { videos, totalPages } = await getAllVideos(page, limit);
-    return {
-      props: {
-        videos,
-        currentPage: page,
-        totalPages,
-      },
-    };
-  } catch (error) {
-    console.error('Error fetching videos:', error);
-    return { props: { videos: [], currentPage: 1, totalPages: 1 } };
-  }
+  const { videos, totalPages } = await getAllVideos(page, limit);
+  return {
+    props: {
+      videos,
+      currentPage: page,
+      totalPages,
+    },
+  };
 };
 
 export default Explore;

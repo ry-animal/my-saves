@@ -38,7 +38,7 @@ const SubmitPage: NextPage = () => {
 
   return (
     <>
-      <SEO title="Submit a Video" description="Add a new YouTube video to MySaves" ogUrl="/submit" />
+      <SEO title="Submit a Video" description="Add a new YouTube video to MySaves" ogUrl="/submit" ogImage="/og.jpg" />
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6 text-white">Submit a Video</h1>
         <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
@@ -56,7 +56,7 @@ const SubmitPage: NextPage = () => {
               required
             />
           </div>
-          {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
+          {error && <p className="text-red-500 text-xs italic mb-4 bg-white rounded-lg p-2">{error}</p>}
           <div className="flex items-center justify-between font-broadway text-xxl">
             <button
               type="submit"
