@@ -154,12 +154,10 @@ export async function getAllVideos(page: number, limit: number, random: boolean 
     let videoIds: string[];
 
     if (random) {
-      // For random selection (e.g., home page)
       const allVideoIds = await kv.lrange('all_videos', 0, -1);
       const shuffledIds = shuffleArray(allVideoIds);
       videoIds = shuffledIds.slice(0, limit);
     } else {
-      // For ordered selection with pagination (e.g., explore page)
       const start = (page - 1) * limit;
       const end = start + limit - 1;
       videoIds = await kv.lrange('all_videos', start, end);

@@ -52,7 +52,7 @@ const VideoPage: NextPage<VideoPageProps> = ({ video }) => {
   };
 
   const ytId = extractVideoId(video.url);
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://my-saves.vercel.app'; // Replace with your actual base URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://my-saves-seven.vercel.app';
   const fullUrl = `${baseUrl}/videos/${video.id}`;
 
   return (
