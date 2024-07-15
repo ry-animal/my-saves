@@ -51,8 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'MySaves' }) => {
       </main>
 
       <footer className="bg-black/10 py-4 mt-8 shadow-sm flex justify-center items-center gap-2">
-        <p className="text-sm mt-4">&copy; {new Date().getFullYear()}</p>
-        <p className="font-aliens text-lg">MySaves. All rights reserved.</p>
+        <p className="font-broadway text-lg">&copy; {new Date().getFullYear()} - MySaves. All rights reserved.</p>
       </footer>
     </div>
   );
