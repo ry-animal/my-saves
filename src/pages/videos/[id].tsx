@@ -71,7 +71,7 @@ const VideoPage: NextPage<VideoPageProps> = ({ video }) => {
         <meta name="twitter:description" content={video.description || `Watch "${video.title}" on MySaves`} />
         <meta name="twitter:image" content={video.thumbnailUrl} />
       </Head>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 text-white">
         <h1 className="text-2xl font-bold mb-4">{video.title}</h1>
         <Player videoId={ytId} isShort={video.isShort} />
         {video.description && (
