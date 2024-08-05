@@ -24,7 +24,6 @@ Feature ideas:
   - Caution: Please watch out for the cold start issue since that can negatively impact the user experience.
     Deliverables:
 
-1. A private GitHub repository with @raxityo and @anoakie added as collaborators. Feel free to leave your thought process, approach, and UX in the README.md of your repository.
 2. A link to your production app on Vercel or any other platform.
 
 References:
